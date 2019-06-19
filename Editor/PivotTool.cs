@@ -30,6 +30,10 @@ namespace uTools
         private SceneView view;
         private Ray ray;
         private RaycastHit hit;
+
+        private KeyCode pivotKey;
+        private KeyCode snapKey;
+
         private static string packagePath;// = "Packages/com.ltk.pivot/";
         private static PivotTool instance;
 
@@ -122,6 +126,8 @@ namespace uTools
                 instance = null;
                 return;
             }
+            pivotKey = ShortcutManager.instance.GetShortcutBinding("PivotTool/Adjust Pivot").keyCombinationSequence.FirstOrDefault().keyCode;
+            snapKey = ShortcutManager.instance.GetShortcutBinding("PivotTool/Snap Pivot").keyCombinationSequence.FirstOrDefault().keyCode;
             instance = this;
             Undo.undoRedoPerformed += UndoCallback;
             pivot = new GameObject("Pivot").transform;
@@ -233,7 +239,7 @@ namespace uTools
             }
         }
 
-        private bool Raycast(out RaycastHit hit)
+        private bool Raycast()
         {
             GameObject g = HandleUtility.PickGameObject(e.mousePosition, false);
             if (g)
@@ -278,21 +284,14 @@ namespace uTools
                 // Ensure clicking in snap mode doesn't select the object under the pointer
                 HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
             }
-            // if (snapPivot && pivotPreview != Vector3.positiveInfinity)
-            // {
-            //     Handles.SphereHandleCap(0, pivotPreview, Quaternion.identity, 0.1f, EventType.Repaint);
-            // }
-            // if (snapPivot && e.type == EventType.MouseMove)
-            // {
-            //     if (Raycast(out hit))
-            //     {
-            //         pivotPreview = hit.point;
-            //     }
-            //     return;
-            // }
+            if ((!snapPivot && snapKey != KeyCode.None && e.type == EventType.KeyDown && e.keyCode == snapKey) ||
+                (snapPivot && e.type == EventType.MouseMove))
+            {
+                Raycast();
+            }
             if (snapPivot && e.type == EventType.MouseUp && e.button == 0)
             {
-                if (Raycast(out hit))
+                if (Raycast())
                 {
                     Undo.RecordObjects(selectedObjects.Select(o => o.Transform).ToArray(), "Move");
                     Undo.RecordObjects(selectedObjects.Select(o => o.Pivot).ToArray(), "Move");
@@ -309,6 +308,10 @@ namespace uTools
                     }
                     return;
                 }
+            }
+            if (snapPivot && e.type == EventType.Repaint && hit.distance > 0)
+            {
+                Handles.SphereHandleCap(0, hit.point, Quaternion.identity, 0.1f, EventType.Repaint);
             }
             Handles.TransformHandle(ref pivotPosition, ref pivotRotation, ref pivotScale);
             if (EditorGUIUtility.hotControl != 0)

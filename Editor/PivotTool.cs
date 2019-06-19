@@ -267,7 +267,11 @@ namespace uTools
         {
             view = window as SceneView;
             e = Event.current;
-            if (targets != selection)
+            // Gets around a specific situation with undo
+            // Object selected, tool active, deselect object without deactivating tool
+            // Reselect same object, do something, undo
+            // selection will have a null object in place of the actual object reference for a single cycle
+            if (targets != selection && selection.First() != null)
             {
                 OnSelectionChange();
             }

@@ -307,8 +307,8 @@ namespace uTools
                         entry.Pivot.position = entry.Position;
                         entry.Transform.position = entry.Position;
                     }
+                    return;
                 }
-                return;
             }
             Handles.TransformHandle(ref pivotPosition, ref pivotRotation, ref pivotScale);
             if (EditorGUIUtility.hotControl != 0)

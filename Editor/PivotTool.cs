@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.EditorTools;
-using UnityEngine.Rendering;
 using System.Reflection;
 using UnityEditor.ShortcutManagement;
 using System.Text.RegularExpressions;
@@ -23,6 +22,10 @@ namespace uTools
         private Quaternion pivotRotation;
         private Vector3 pivotScale;
         private Transform rotationReference;
+        // Consider PivotMode enum instead of bools?
+        // Might make multikey situations trickier to handle, at least in code
+        // eg. Hold P, press S, release either.
+        // Restore to the other mode? Restore to None?
         private bool snapPivot;
         private bool adjustPivot;
         private List<TransformEntry> selectedObjects = new List<TransformEntry>();

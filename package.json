@@ -1,0 +1,13 @@
+{
+    "name": "com.ltk.pivot",
+    "displayName": "Hierarchy Tools",
+    "version": "0.0.1",
+    "unity": "2018.1",
+    "description": "Extends Transform with custom pivot functionality.",
+    "keywords": [
+        "transform",
+        "pivot",
+        "unity"
+    ],
+    "category": "Unity"
+}

@@ -1,6 +1,8 @@
 # PivotTool
 ## Description
 This tool extends transform functionality, allowing for temporary custom pivots for objects and groups of objects, without the hassle involved with creating empty GameObjects. The pivot can be repositioned and rotated independent of the selected objects.
+
+https://imgur.com/a/evZU85f
 ## Instructions
 ## Hotkeys
 Hotkeys make use of the Shortcut API, so the following are rebindable via *Edit->Shortcuts*.

@@ -1,6 +1,6 @@
 {
     "name": "com.ltk.pivot",
-    "displayName": "Hierarchy Tools",
+    "displayName": "Pivot Tool",
     "version": "0.0.1",
     "unity": "2018.1",
     "description": "Extends Transform with custom pivot functionality.",

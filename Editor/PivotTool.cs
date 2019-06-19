@@ -30,7 +30,7 @@ namespace uTools
         private SceneView view;
         private Ray ray;
         private RaycastHit hit;
-        private string packagePath;// = "Packages/com.ltk.pivot/";
+        private static string packagePath;// = "Packages/com.ltk.pivot/";
         private static PivotTool instance;
 
         public class TransformEntry
@@ -61,7 +61,7 @@ namespace uTools
             {
                 if (m_IconContent == null)
                 {
-                    m_IconContent = new GUIContent(Resources.Load<Texture2D>("T_PivotIcon"), "Pivot Tool");
+                    m_IconContent = new GUIContent(AssetDatabase.LoadAssetAtPath<Texture2D>(packagePath + "Icons/T_PivotIcon.png"), "Pivot Tool");
                 }
                 return m_IconContent;
             }
@@ -109,6 +109,7 @@ namespace uTools
                 Undo.undoRedoPerformed -= UndoCallback;
                 foreach (var entry in selectedObjects)
                 {
+                    entry.Transform.hideFlags = HideFlags.None;
                     if (entry.Pivot)
                     {
                         DestroyImmediate(entry.Pivot.gameObject);
@@ -175,6 +176,7 @@ namespace uTools
             Vector3 up = Vector3.zero;
             foreach (var entry in selectedObjects)
             {
+                entry.Transform.hideFlags = HideFlags.None;
                 if (entry.Pivot)
                 {
                     DestroyImmediate(entry.Pivot.gameObject);
@@ -192,6 +194,7 @@ namespace uTools
             foreach (var t in selection.Select(o => o as Transform))
             {
                 selectedObjects.Add(new TransformEntry(t, ref pivot));
+                t.hideFlags = HideFlags.NotEditable;
             }
             pivotScale = Vector3.one;
         }

@@ -267,11 +267,17 @@ namespace uTools
         {
             view = window as SceneView;
             e = Event.current;
+            // selection.First() != null
             // Gets around a specific situation with undo
             // Object selected, tool active, deselect object without deactivating tool
             // Reselect same object, do something, undo
             // selection will have a null object in place of the actual object reference for a single cycle
-            if (targets != selection && selection.First() != null)
+            //
+            // selection == null
+            // Fixes an issue if the tool is active when a domain reload happens
+            //
+            // Need this bit since we don't have an OnSelectionChange callback
+            if (selection == null || (targets != selection && selection.First() != null))
             {
                 OnSelectionChange();
             }
@@ -318,7 +324,11 @@ namespace uTools
             }
             if (snapPivot && e.type == EventType.Repaint && hit.distance > 0)
             {
-                Handles.SphereHandleCap(0, hit.point, Quaternion.identity, 0.1f, EventType.Repaint);
+                Color c = Handles.color;
+                Handles.color = Color.white * 0.5f;
+                Handles.SphereHandleCap(0, hit.point, Quaternion.identity, HandleUtility.GetHandleSize(hit.point) * 0.1f, EventType.Repaint);
+                Handles.SphereHandleCap(0, hit.point, Quaternion.identity, view.camera.farClipPlane / 100000, EventType.Repaint);
+                Handles.color = c;
             }
             Handles.TransformHandle(ref pivotPosition, ref pivotRotation, ref pivotScale);
             if (EditorGUIUtility.hotControl != 0)

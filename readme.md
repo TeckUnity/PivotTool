@@ -2,7 +2,8 @@
 ## Description
 This tool extends transform functionality, allowing for temporary custom pivots for objects and groups of objects, without the hassle involved with creating empty GameObjects. The pivot can be repositioned and rotated independent of the selected objects.
 
-https://imgur.com/a/evZU85f
+<img src="https://i.imgur.com/2ebgC2e.gif" width="32%" /> <img src="https://i.imgur.com/6bh65KO.gif" width="32%" /> <img src="https://i.imgur.com/HYNOnm5.gif" width="32%" />
+
 ## Getting Started
 If you have the Custom Tools panel enabled, the Pivot Tool icon will be available as long as you have at least one scene object selected. Alternately, you can click on the Custom Tool icon (next to the Transform tool in the left of the main toolbar).
 ## Instructions

@@ -28,3 +28,4 @@ Hotkeys make use of the Shortcut API, so the following are rebindable via *Edit-
   * Could be tricky to manage in the sense that a user could easily end up with a ridiculous chain of empties if not careful
 * Option to change hotkey behaviour from press-and-hold to toggle (in preferences)
 * Snap could instead snap the object[s] to the position. Combining Snap with Adjust would snap the pivot independent of the object[s].
+* Either add a **Snap to Vertex** mode, or optionally allow the existing Snap mode to snap to vertices within a configurable threshold

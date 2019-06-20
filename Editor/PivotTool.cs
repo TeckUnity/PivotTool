@@ -325,8 +325,9 @@ namespace uTools
             if (snapPivot && e.type == EventType.Repaint && hit.distance > 0)
             {
                 Color c = Handles.color;
-                Handles.color = Color.white * 0.5f;
+                Handles.color = Color.white * 0.9f;
                 Handles.SphereHandleCap(0, hit.point, Quaternion.identity, HandleUtility.GetHandleSize(hit.point) * 0.1f, EventType.Repaint);
+                Handles.color = Color.white * 0.5f;
                 Handles.SphereHandleCap(0, hit.point, Quaternion.identity, view.camera.farClipPlane / 100000, EventType.Repaint);
                 Handles.color = c;
             }

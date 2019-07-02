@@ -33,12 +33,27 @@ namespace uTools
         private SceneView view;
         private Ray ray;
         private RaycastHit hit;
+        private MeshFilter currentMeshFilter;
+        private Vector3[] currentVerts;
+        private Edge[] currentEdges;
 
         private KeyCode pivotKey;
         private KeyCode snapKey;
 
         private static string packagePath;// = "Packages/com.ltk.pivot/";
         private static PivotTool instance;
+
+        public struct Edge
+        {
+            public Vector3 v0;
+            public Vector3 v1;
+
+            public Edge(Vector3 _v0, Vector3 _v1)
+            {
+                v0 = _v0;
+                v1 = _v1;
+            }
+        }
 
         public class TransformEntry
         {
@@ -116,6 +131,10 @@ namespace uTools
                 Undo.undoRedoPerformed -= UndoCallback;
                 foreach (var entry in selectedObjects)
                 {
+                    if (entry.Transform == null)
+                    {
+                        continue;
+                    }
                     entry.Transform.hideFlags = HideFlags.None;
                     if (entry.Pivot)
                     {
@@ -242,6 +261,25 @@ namespace uTools
             }
         }
 
+        private Edge[] GetMeshEdges(MeshFilter mf)
+        {
+            Mesh mesh = mf.sharedMesh;
+            HashSet<Edge> edges = new HashSet<Edge>();
+
+            for (int i = 0; i < mesh.triangles.Length; i += 3)
+            {
+                var v1 = mf.transform.TransformPoint(mesh.vertices[mesh.triangles[i]]);
+                var v2 = mf.transform.TransformPoint(mesh.vertices[mesh.triangles[i + 1]]);
+                var v3 = mf.transform.TransformPoint(mesh.vertices[mesh.triangles[i + 2]]);
+                edges.Add(new Edge(v1, v2));
+                edges.Add(new Edge(v1, v3));
+                edges.Add(new Edge(v2, v3));
+            }
+
+            return edges.ToArray();
+        }
+
+
         private bool Raycast()
         {
             GameObject g = HandleUtility.PickGameObject(e.mousePosition, false);
@@ -250,6 +288,16 @@ namespace uTools
                 MeshFilter mf = g.GetComponent<MeshFilter>();
                 if (mf)
                 {
+                    if (currentMeshFilter != mf)
+                    {
+                        currentMeshFilter = mf;
+                        currentVerts = new Vector3[mf.sharedMesh.vertexCount];
+                        for (int i = 0; i < currentVerts.Length; i++)
+                        {
+                            currentVerts[i] = mf.transform.TransformPoint(mf.sharedMesh.vertices[i]);
+                        }
+                        currentEdges = GetMeshEdges(currentMeshFilter);
+                    }
                     Vector2 mousePosition = view.camera.ScreenToViewportPoint(e.mousePosition * EditorGUIUtility.pixelsPerPoint);
                     mousePosition.y = 1 - mousePosition.y;
                     ray = view.camera.ViewportPointToRay(mousePosition);
@@ -296,6 +344,41 @@ namespace uTools
             {
                 // Ensure clicking in snap mode doesn't select the object under the pointer
                 HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+                if (currentMeshFilter)
+                {
+                    float d = Mathf.Infinity;
+                    int index = -1;
+                    Vector3 p = view.camera.WorldToScreenPoint(hit.point);
+                    for (int i = 0; i < currentVerts.Length; i++)
+                    {
+                        Handles.DotHandleCap(0, currentVerts[i], Quaternion.identity, HandleUtility.GetHandleSize(currentVerts[i]) * 0.05f, EventType.Repaint);
+                        float d2 = (view.camera.WorldToScreenPoint(currentVerts[i]) - p).sqrMagnitude;
+                        if (d2 < d)
+                        {
+                            d = d2;
+                            index = i;
+                        }
+                    }
+                    if (d < 25 * 25)
+                    {
+                        hit.point = currentVerts[index];
+                    }
+                    // index = -1;
+                    // for (int i = 0; i < currentEdges.Length; i++)
+                    // {
+                    //     p = HandleUtility.ClosestPointToPolyLine(currentEdges[i].v0, currentEdges[i].v1);
+                    //     float d2 = (p - hit.point).sqrMagnitude;
+                    //     if (d2 < d)
+                    //     {
+                    //         index = i;
+                    //         d = d2;
+                    //     }
+                    // }
+                    // if (d < 0.1f * 0.1f)
+                    // {
+                    //     hit.point = p;
+                    // }
+                }
             }
             if ((!snapPivot && snapKey != KeyCode.None && e.type == EventType.KeyDown && e.keyCode == snapKey) ||
                 (snapPivot && e.type == EventType.MouseMove))
@@ -304,20 +387,24 @@ namespace uTools
             }
             if (snapPivot && e.type == EventType.MouseUp && e.button == 0)
             {
-                if (Raycast())
+                // if (Raycast())
                 {
                     Undo.RecordObjects(selectedObjects.Select(o => o.Transform).ToArray(), "Move");
                     Undo.RecordObjects(selectedObjects.Select(o => o.Pivot).ToArray(), "Move");
                     Undo.RecordObject(pivot, "Move");
-                    foreach (var entry in selectedObjects)
-                    {
-                        entry.Position = entry.Pivot.position;
-                    }
                     pivot.position = pivotPosition = hit.point;
                     foreach (var entry in selectedObjects)
                     {
-                        entry.Pivot.position = entry.Position;
-                        entry.Transform.position = entry.Position;
+                        if (adjustPivot)
+                        {
+                            // entry.Position = entry.Pivot.position;
+                            entry.Pivot.position = entry.Position;
+                            // entry.Transform.position = entry.Position;
+                        }
+                        else
+                        {
+                            entry.Transform.position = entry.Pivot.position;
+                        }
                     }
                     return;
                 }

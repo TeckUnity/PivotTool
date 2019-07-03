@@ -446,7 +446,14 @@ namespace uTools
             }
             else
             {
-                Handles.TransformHandle(ref pivotPosition, ref pivotRotation, ref pivotScale);
+                if (adjustPivot)
+                {
+                    Handles.TransformHandle(ref pivotPosition, ref pivotRotation);
+                }
+                else
+                {
+                    Handles.TransformHandle(ref pivotPosition, ref pivotRotation, ref pivotScale);
+                }
             }
             if (EditorGUIUtility.hotControl != 0)
             {

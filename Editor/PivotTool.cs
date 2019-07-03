@@ -294,8 +294,11 @@ namespace uTools
             mousePosition.y = 1 - mousePosition.y;
             ray = view.camera.ViewportPointToRay(mousePosition);
             hitTemp = HandleUtility.RaySnap(ray);
+            // RaySnap doesn't work with any of the 2D stuff, but PickGameObject does
+            // PickGameObject doesn't give me a RaycastHit or a useful alternate, though
             if (hitTemp == null)
             {
+                currentMeshFilter = null;
                 hit = new RaycastHit();
                 currentEdges = null;
                 hit = new RaycastHit();

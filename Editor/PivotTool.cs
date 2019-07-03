@@ -291,36 +291,30 @@ namespace uTools
 
         private bool Raycast(bool forceRefresh = false)
         {
-            Vector2 mousePosition = view.camera.ScreenToViewportPoint(e.mousePosition * EditorGUIUtility.pixelsPerPoint);
-            mousePosition.y = 1 - mousePosition.y;
-            ray = view.camera.ViewportPointToRay(mousePosition);
-            hitTemp = HandleUtility.RaySnap(ray);
-            // RaySnap doesn't work with any of the 2D stuff, but PickGameObject does
-            // PickGameObject doesn't give me a RaycastHit or a useful alternate, though
-            if (hitTemp == null)
+            // TODO: need a way to do this for 2D stuff
+            GameObject go = HandleUtility.PickGameObject(e.mousePosition, false);
+            if (go)
             {
-                currentMeshFilter = null;
-                hit = new RaycastHit();
-                currentEdges = null;
-                hit = new RaycastHit();
-                return false;
-            }
-            hit = (RaycastHit)hitTemp;
-            if (hit.transform)
-            {
-                MeshFilter mf = hit.transform.GetComponent<MeshFilter>();
+                MeshFilter mf = go.GetComponent<MeshFilter>();
                 if (mf)
                 {
-                    if (currentMeshFilter != mf || forceRefresh)
+                    Vector2 mousePosition = view.camera.ScreenToViewportPoint(e.mousePosition * EditorGUIUtility.pixelsPerPoint);
+                    mousePosition.y = 1 - mousePosition.y;
+                    ray = view.camera.ViewportPointToRay(mousePosition);
+                    if (MeshRaycast.IntersectRayMesh(ray, mf, out hit))
                     {
-                        currentMeshFilter = mf;
-                        currentEdges = GetMeshEdges(currentMeshFilter);
+                        if (currentMeshFilter != mf || forceRefresh)
+                        {
+                            currentMeshFilter = mf;
+                            currentEdges = GetMeshEdges(currentMeshFilter);
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
-            currentEdges = null;
             hit = new RaycastHit();
+            currentMeshFilter = null;
+            currentEdges = null;
             return false;
         }
 

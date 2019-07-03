@@ -32,3 +32,4 @@ Hotkeys make use of the Shortcut API, so the following are rebindable via *Edit-
 * ~~Snap could instead snap the object[s] to the position. Combining Snap with Adjust would snap the pivot independent of the object[s].~~ *Done*
 * ~~Either add a **Snap to Vertex** mode, or optionally allow the existing Snap mode to snap to vertices within a configurable threshold~~ *Done*
 * ~~Configurable threshold for vertex/edge snapping (either Scene View UI or in preferences)~~ *Done*
+* Get this to work with 2D stuff

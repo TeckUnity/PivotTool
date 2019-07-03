@@ -35,8 +35,10 @@ namespace uTools
         private Vector3 adjustedPoint;
         private bool snapped;
 
-        private KeyCode pivotKey;
+        private KeyCode adjustKey;
         private KeyCode snapKey;
+
+        private GUIStyle toggleButton;
 
         private static string packagePath;// = "Packages/com.ltk.pivot/";
         private static PivotTool instance;
@@ -148,7 +150,7 @@ namespace uTools
                 instance = null;
                 return;
             }
-            pivotKey = ShortcutManager.instance.GetShortcutBinding("PivotTool/Adjust Pivot").keyCombinationSequence.FirstOrDefault().keyCode;
+            adjustKey = ShortcutManager.instance.GetShortcutBinding("PivotTool/Adjust Pivot").keyCombinationSequence.FirstOrDefault().keyCode;
             snapKey = ShortcutManager.instance.GetShortcutBinding("PivotTool/Snap Pivot").keyCombinationSequence.FirstOrDefault().keyCode;
             instance = this;
             Undo.undoRedoPerformed += UndoCallback;
@@ -177,6 +179,10 @@ namespace uTools
             {
                 entry.Position = entry.Pivot.position;
                 entry.Rotation = entry.Pivot.rotation;
+            }
+            if (currentMeshFilter)
+            {
+                currentEdges = GetMeshEdges(currentMeshFilter);
             }
         }
 
@@ -316,6 +322,11 @@ namespace uTools
 
         public override void OnToolGUI(EditorWindow window)
         {
+            if (toggleButton == null)
+            {
+                toggleButton = new GUIStyle(GUI.skin.button);
+                toggleButton.alignment = TextAnchor.MiddleRight;
+            }
             view = window as SceneView;
             e = Event.current;
             // selection.First() != null
@@ -509,8 +520,8 @@ namespace uTools
                 }
             }
             Handles.BeginGUI();
-            adjustPivot = GUILayout.Toggle(adjustPivot, "Adjust\r\nPivot", GUI.skin.button, GUILayout.Width(60), GUILayout.Height(40));
-            snapPivot = GUILayout.Toggle(snapPivot, "Snap\r\nPivot", GUI.skin.button, GUILayout.Width(60), GUILayout.Height(40));
+            adjustPivot = GUILayout.Toggle(adjustPivot, "[" + adjustKey.ToString() + "] Adjust\r\nPivot", toggleButton, GUILayout.Width(70), GUILayout.Height(40));
+            snapPivot = GUILayout.Toggle(snapPivot, "[" + snapKey.ToString() + "] Snap\r\nPivot", toggleButton, GUILayout.Width(70), GUILayout.Height(40));
             Handles.EndGUI();
         }
     }

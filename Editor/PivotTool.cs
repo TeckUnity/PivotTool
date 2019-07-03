@@ -34,6 +34,7 @@ namespace uTools
         private Edge[] currentEdges;
         private Vector3 adjustedPoint;
         private bool snapped;
+        private float snapTolerance = 25;
 
         private KeyCode adjustKey;
         private KeyCode snapKey;
@@ -377,7 +378,7 @@ namespace uTools
                     edgePoints[1] = (edge.v0 + edge.v1) / 2;
                     edgePoints[2] = edge.v1;
                     Vector3 cp = edgePoints.OrderBy(v => (view.camera.WorldToScreenPoint(v) - p).sqrMagnitude).First();
-                    if ((view.camera.WorldToScreenPoint(cp) - p).sqrMagnitude < 25 * 25)
+                    if ((view.camera.WorldToScreenPoint(cp) - p).sqrMagnitude < snapTolerance * snapTolerance)
                     {
                         p1 = cp;
                     }
@@ -387,7 +388,7 @@ namespace uTools
                     }
                     if (d < 0.1f)
                     {
-                        if ((view.camera.WorldToScreenPoint(p1) - p).sqrMagnitude < 25 * 25)
+                        if ((view.camera.WorldToScreenPoint(p1) - p).sqrMagnitude < snapTolerance * snapTolerance)
                         {
                             Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
                             Color c = Handles.color;
@@ -525,6 +526,14 @@ namespace uTools
             Handles.BeginGUI();
             adjustPivot = GUILayout.Toggle(adjustPivot, "[" + adjustKey.ToString() + "] Adjust\r\nPivot", toggleButton, GUILayout.Width(70), GUILayout.Height(40));
             snapPivot = GUILayout.Toggle(snapPivot, "[" + snapKey.ToString() + "] Snap\r\nPivot", toggleButton, GUILayout.Width(70), GUILayout.Height(40));
+            GUILayout.Box("Snap\r\nTolerance", GUILayout.Width(70));
+            snapTolerance = EditorGUILayout.FloatField(snapTolerance, GUILayout.Width(70));
+            if (GUILayout.Button("Snap\r\nSettings", GUILayout.Width(70)))
+            {
+                var editorTypes = typeof(UnityEditor.Editor).Assembly.GetTypes();
+                var snap = editorTypes.FirstOrDefault(t => t.Name == "SnapSettings");
+                EditorWindow.GetWindow(snap, true);
+            }
             Handles.EndGUI();
         }
     }

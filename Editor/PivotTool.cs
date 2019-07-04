@@ -31,6 +31,7 @@ namespace uTools
         private RaycastHit hit;
         private object hitTemp;
         private MeshFilter currentMeshFilter;
+        private SpriteRenderer currentSpriteRenderer;
         private Edge[] currentEdges;
         private Vector3 adjustedPoint;
         private bool snapped;
@@ -185,6 +186,10 @@ namespace uTools
             {
                 currentEdges = GetMeshEdges(currentMeshFilter);
             }
+            if (currentSpriteRenderer)
+            {
+                currentEdges = GetMeshEdges(currentSpriteRenderer);
+            }
         }
 
         void OnSelectionChange()
@@ -288,11 +293,67 @@ namespace uTools
             return edges.ToArray();
         }
 
+        private Edge[] GetMeshEdges(SpriteRenderer sr)
+        {
+            HashSet<Edge> edges = new HashSet<Edge>();
+
+            // Getting the triangulated sprite edges doesn't feel as useful after trying it out
+            // for (int i = 0; i < sr.sprite.triangles.Length; i += 3)
+            // {
+            //     var v0 = sr.transform.TransformPoint(sr.sprite.vertices[sr.sprite.triangles[i]]);
+            //     var v1 = sr.transform.TransformPoint(sr.sprite.vertices[sr.sprite.triangles[i + 1]]);
+            //     var v2 = sr.transform.TransformPoint(sr.sprite.vertices[sr.sprite.triangles[i + 2]]);
+            //     edges.Add(new Edge(v0, v1, -view.camera.transform.forward));
+            //     edges.Add(new Edge(v0, v2, -view.camera.transform.forward));
+            //     edges.Add(new Edge(v1, v2, -view.camera.transform.forward));
+            // }
+
+            // Get the sprite's rect instead
+            Rect r = sr.sprite.rect;
+            Vector2 size = sr.transform.TransformPoint(r.size) / sr.sprite.pixelsPerUnit;
+            r.position = sr.transform.position;
+            r.position -= size / 2;
+            r.size = size;
+            float z = sr.transform.position.z;
+            Vector3 n = -view.camera.transform.forward;
+            Vector3 v0 = r.min;
+            v0.z = z;
+            Vector3 v1 = new Vector3(r.xMax, r.yMin, z);
+            Vector3 v2 = r.max;
+            v2.z = z;
+            Vector3 v3 = new Vector3(r.xMin, r.yMax, z);
+            edges.Add(new Edge(v0, v1, n));
+            edges.Add(new Edge(v1, v2, n));
+            edges.Add(new Edge(v2, v3, n));
+            edges.Add(new Edge(v3, v0, n));
+            edges.Add(new Edge(v0, v2, n));
+            edges.Add(new Edge(v1, v3, n));
+
+            return edges.ToArray();
+        }
+
 
         private bool Raycast(bool forceRefresh = false)
         {
-            // TODO: need a way to do this for 2D stuff
+            // TODO: need a more robust way to do this for 2D stuff
+            // Do SpriteShape, etc derive from SpriteRenderer? Probably not?
             GameObject go = HandleUtility.PickGameObject(e.mousePosition, false);
+            if (!go && currentSpriteRenderer)
+            {
+                Vector2 mousePosition = e.mousePosition;
+                mousePosition.y = view.camera.pixelHeight - mousePosition.y;
+                Vector3 p = view.camera.ScreenToWorldPoint(mousePosition * EditorGUIUtility.pixelsPerPoint);
+                p.z = currentSpriteRenderer.transform.position.z;
+                Rect r = currentSpriteRenderer.sprite.rect;
+                Vector2 size = currentSpriteRenderer.transform.TransformPoint(r.size) / currentSpriteRenderer.sprite.pixelsPerUnit;
+                r.position = currentSpriteRenderer.transform.position;
+                r.position -= size / 2;
+                r.size = size;
+                if (r.Contains(p))
+                {
+                    go = currentSpriteRenderer.gameObject;
+                }
+            }
             if (go)
             {
                 MeshFilter mf = go.GetComponent<MeshFilter>();
@@ -305,11 +366,27 @@ namespace uTools
                     {
                         if (currentMeshFilter != mf || forceRefresh)
                         {
+                            currentSpriteRenderer = null;
                             currentMeshFilter = mf;
                             currentEdges = GetMeshEdges(currentMeshFilter);
                         }
                         return true;
                     }
+                }
+                SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+                if (sr && view.in2DMode)
+                {
+                    Vector2 mousePosition = view.camera.ScreenToViewportPoint(e.mousePosition * EditorGUIUtility.pixelsPerPoint);
+                    mousePosition.y = 1 - mousePosition.y;
+                    ray = view.camera.ViewportPointToRay(mousePosition);
+                    hit = new RaycastHit();
+                    float d = sr.transform.position.z - view.camera.transform.position.z;
+                    hit.point = ray.GetPoint(d);
+                    hit.distance = Mathf.Abs(d);
+                    currentMeshFilter = null;
+                    currentSpriteRenderer = sr;
+                    currentEdges = GetMeshEdges(sr);
+                    return true;
                 }
             }
             hit = new RaycastHit();

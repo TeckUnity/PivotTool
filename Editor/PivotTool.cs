@@ -443,7 +443,7 @@ namespace uTools
                     Vector3 p = view.camera.WorldToScreenPoint(hit.point);
                     Vector3 p1 = p;
                     adjustedPoint = hit.point;
-                    Edge edge = currentEdges.Where(e => Vector3.Dot(e.n, ray.direction) < 0).OrderBy(e => HandleUtility.DistancePointLine(hit.point, e.v0, e.v1)).First();
+                    // Edge edge = currentEdges.Where(e => Vector3.Dot(e.n, ray.direction) < 0).OrderBy(e => HandleUtility.DistancePointLine(hit.point, e.v0, e.v1)).First();
                     Edge[] edges = currentEdges.Where(e => Vector3.Dot(e.n, ray.direction) < 0).OrderBy(e => HandleUtility.DistancePointLine(hit.point, e.v0, e.v1)).ToArray();
                     int max = Mathf.Min(edges.Length, 25);
                     for (int i = 1; i < max; i++)
@@ -459,33 +459,36 @@ namespace uTools
                         Handles.color = c;
                         Handles.zTest = UnityEngine.Rendering.CompareFunction.Always;
                     }
-                    float d = HandleUtility.DistancePointLine(hit.point, edge.v0, edge.v1);
-                    edgePoints[0] = edge.v0;
-                    edgePoints[1] = (edge.v0 + edge.v1) / 2;
-                    edgePoints[2] = edge.v1;
-                    Vector3 cp = edgePoints.OrderBy(v => (view.camera.WorldToScreenPoint(v) - p).sqrMagnitude).First();
-                    if ((view.camera.WorldToScreenPoint(cp) - p).sqrMagnitude < snapTolerance * snapTolerance)
-                    // if (HandleUtility.DistanceToCircle(cp, 0) < snapTolerance)
+                    if (edges.Length > 0)
                     {
-                        p1 = cp;
-                    }
-                    else
-                    {
-                        p1 = HandleUtility.ProjectPointLine(hit.point, edge.v0, edge.v1);
-                    }
-                    if (d < 0.1f)
-                    {
+                        float d = HandleUtility.DistancePointLine(hit.point, edges[0].v0, edges[0].v1);
+                        edgePoints[0] = edges[0].v0;
+                        edgePoints[1] = (edges[0].v0 + edges[0].v1) / 2;
+                        edgePoints[2] = edges[0].v1;
+                        Vector3 cp = edgePoints.OrderBy(v => (view.camera.WorldToScreenPoint(v) - p).sqrMagnitude).First();
+                        if ((view.camera.WorldToScreenPoint(cp) - p).sqrMagnitude < snapTolerance * snapTolerance)
                         // if (HandleUtility.DistanceToCircle(cp, 0) < snapTolerance)
-                        if ((view.camera.WorldToScreenPoint(p1) - p).sqrMagnitude < snapTolerance * snapTolerance)
                         {
-                            Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
-                            Color c = Handles.color;
-                            Handles.color = Color.cyan;
-                            Handles.DrawAAPolyLine(5, edge.v0, edge.v1);
-                            Handles.color = c;
-                            Handles.zTest = UnityEngine.Rendering.CompareFunction.Always;
-                            adjustedPoint = p1;
-                            snapped = true;
+                            p1 = cp;
+                        }
+                        else
+                        {
+                            p1 = HandleUtility.ProjectPointLine(hit.point, edges[0].v0, edges[0].v1);
+                        }
+                        if (d < 0.1f)
+                        {
+                            // if (HandleUtility.DistanceToCircle(cp, 0) < snapTolerance)
+                            if ((view.camera.WorldToScreenPoint(p1) - p).sqrMagnitude < snapTolerance * snapTolerance)
+                            {
+                                Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
+                                Color c = Handles.color;
+                                Handles.color = Color.cyan;
+                                Handles.DrawAAPolyLine(5, edges[0].v0, edges[0].v1);
+                                Handles.color = c;
+                                Handles.zTest = UnityEngine.Rendering.CompareFunction.Always;
+                                adjustedPoint = p1;
+                                snapped = true;
+                            }
                         }
                     }
                 }

@@ -93,7 +93,7 @@ namespace uTools
             }
         }
 
-        [ClutchShortcut("PivotTool/Adjust Pivot", typeof(SceneView), KeyCode.P)]
+        [ClutchShortcut("PivotTool/Adjust Pivot", typeof(SceneView), KeyCode.A)]
         static void AdjustPivot(ShortcutArguments args)
         {
             if (!EditorTools.IsActiveTool(instance))

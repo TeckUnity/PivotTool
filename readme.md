@@ -4,6 +4,9 @@ This tool extends transform functionality, allowing for temporary custom pivots 
 
 <img src="https://i.imgur.com/ZbPeKu3.gif" width="24%" /> <img src="https://i.imgur.com/UTjgxJm.gif" width="24%" /> <img src="https://i.imgur.com/ZwMU7iG.gif" width="24%" /> <img src="https://i.imgur.com/3Uu2uFH.gif" width="24%">
 
+## Installation
+This is set up as a UPM package, so you can add to your project either via Package Manager's `Add package from git URL` [https://github.com/TeckUnity/PivotTool.git], or grab the repo and `Add package from disk`.
+
 ## Getting Started
 If you have the Custom Tools panel enabled, the Pivot Tool icon will be available as long as you have at least one scene object selected. Alternately, you can click on the Custom Tool icon (next to the Transform tool in the left of the main toolbar).
 ## Instructions
